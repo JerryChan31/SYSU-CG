@@ -22,7 +22,6 @@ const char* fragment_shader_src =
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
-void drawTriangle();
 
 int main() {
   glfwInit();
@@ -53,45 +52,9 @@ int main() {
     return -1;
   }
 
-  // render loop
-  // render until close the windows
-  while (!glfwWindowShouldClose(window)) {
-    // process input from keyboard/mouse/other
-    processInput(window);
-
-    // code
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    // draw in a function
-    drawTriangle();
-
-    // swap color buffer to show image
-    glfwSwapBuffers(window);
-    // check out triggerations
-    glfwPollEvents();
-  }
-
-  // release sources
-  glfwTerminate();
-  return 0;
-}
-
-void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
-  glViewport(0, 0, width, height);
-}
-
-void processInput(GLFWwindow* window) {
-  // press ESC to close
-  if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-    glfwSetWindowShouldClose(window, true);
-  }
-}
-
-void drawTriangle() {
   float vertices[] = {
     -0.5f, -0.5f, 0.0f,
-     0.5f, -0.5f, 0.0f,
+    0.5f, -0.5f, 0.0f,
     -0.0f,  0.5f, 0.0f,
   };
   unsigned int VBO;
@@ -134,8 +97,53 @@ void drawTriangle() {
   // delete shaders
   glDeleteShader(vertexShader);
   glDeleteShader(fragmentShader);
-  
+
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
 
+  // create VAO
+  unsigned int VAO;
+  glGenVertexArrays(1, &VAO);
+  glBindVertexArray(VAO);
+  // Copy vertices to buffer
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+  // set pointers
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+  glEnableVertexAttribArray(0);
+
+  // render loop
+  // render until close the windows
+  while (!glfwWindowShouldClose(window)) {
+    // process input from keyboard/mouse/other
+    processInput(window);
+
+    // code
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glUseProgram(shaderProgram);
+    glBindVertexArray(VAO);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+
+    // swap color buffer to show image
+    glfwSwapBuffers(window);
+    // check out triggerations
+    glfwPollEvents();
+  }
+  glUseProgram(shaderProgram);
+  glBindVertexArray(VAO);
+  // release sources
+  glfwTerminate();
+  return 0;
+}
+
+void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+  glViewport(0, 0, width, height);
+}
+
+void processInput(GLFWwindow* window) {
+  // press ESC to close
+  if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+    glfwSetWindowShouldClose(window, true);
+  }
 }
