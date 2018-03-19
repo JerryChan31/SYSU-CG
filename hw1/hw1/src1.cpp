@@ -65,9 +65,11 @@ int main() {
   ImVec4 tri3 = ImVec4(0.0f, 0.0f, 1.0f, 1.00f);
   float triangleVertices[] = {
     -0.5f, -0.5f, 0.0f, tri1.x, tri1.y, tri1.z,
-    0.5f, -0.5f, 0.0f, tri2.x, tri2.y, tri2.z,
-    0.0f,  0.5f, 0.0f, tri3.x, tri3.y, tri3.z
+     0.5f, -0.5f, 0.0f, tri2.x, tri2.y, tri2.z,
+     0.0f,  0.5f, 0.0f, tri3.x, tri3.y, tri3.z
   };
+  ImVec4 lineVertex1 = ImVec4(1.5f, 1.5f, 0.0f, 1.0f);
+  ImVec4 lineVertex2 = ImVec4(1.5f, 1.8f, 0.0f, 1.0f);
 
   unsigned int VBO;
   // generate VBO & bind to buffer
@@ -127,6 +129,8 @@ int main() {
 
   // ---- render loop ----
   while (!glfwWindowShouldClose(window)) {
+    processInput(window);
+    glfwPollEvents();
     // init ImGui
     ImGui_ImplGlfwGL3_NewFrame();
     ImGui::SetWindowSize(ImVec2(300, 100));
@@ -134,7 +138,7 @@ int main() {
     ImGui::ColorEdit3("Right", (float*)&tri2);
     ImGui::ColorEdit3("Top", (float*)&tri3);
     // process input from keyboard/mouse/other
-    processInput(window);
+    
 
     // change color of vertice
     float triangleVertices[] = {
@@ -153,7 +157,7 @@ int main() {
     glDrawArrays(GL_TRIANGLES, 0, 3);
 
     // check out triggerations & render
-    glfwPollEvents();
+    
     ImGui::Render();
     ImGui_ImplGlfwGL3_RenderDrawData(ImGui::GetDrawData());
     glfwSwapBuffers(window);
