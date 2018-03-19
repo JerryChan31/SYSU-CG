@@ -46,12 +46,31 @@ int main() {
   ImVec4 tri2 = ImVec4(0.0f, 1.0f, 0.0f, 1.00f);
   ImVec4 tri3 = ImVec4(0.0f, 0.0f, 1.0f, 1.00f);
   float vertices[] = {
-    -0.5f, -0.5f, 0.0f, tri1.x, tri1.y, tri1.z,
-     0.5f, -0.5f, 0.0f, tri2.x, tri2.y, tri2.z,
-     0.0f,  0.5f, 0.0f, tri3.x, tri3.y, tri3.z
+    -0.8f, -0.5f, 0.0f, tri1.x, tri1.y, tri1.z,
+    -0.6f,  0.5f, 0.0f, tri2.x, tri2.y, tri2.z,
+    -0.4f, -0.5f, 0.0f, tri3.x, tri3.y, tri3.z,
+    -0.2f,  0.5f, 0.0f, tri1.x, tri1.y, tri1.z,
+    -0.0f, -0.5f, 0.0f, tri2.x, tri2.y, tri2.z,
+     0.2f,  0.5f, 0.0f, tri3.x, tri3.y, tri3.z,
+     0.4f, -0.5f, 0.0f, tri1.x, tri1.y, tri1.z,
+     0.6f,  0.5f, 0.0f, tri2.x, tri2.y, tri2.z,
+     0.8f, -0.5f, 0.0f, tri3.x, tri3.y, tri3.z
+  };
+  unsigned int triangleIndices[] = {
+    0, 1, 2, 
+    3, 4, 5,
+    6, 7, 8
+  };
+  unsigned int lineIndices[] = {
+    0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8
   };
   ImVec4 lineVertex1 = ImVec4(1.5f, 1.5f, 0.0f, 1.0f);
   ImVec4 lineVertex2 = ImVec4(1.5f, 1.8f, 0.0f, 1.0f);
+
+  unsigned int EBO;
+  glGenBuffers(1, &EBO);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(triangleIndices), triangleIndices, GL_STATIC_DRAW);
 
   unsigned int VBO;
   // generate VBO & bind to buffer
@@ -95,11 +114,16 @@ int main() {
     ImGui::ColorEdit3("Right", (float*)&tri2);
     ImGui::ColorEdit3("Top", (float*)&tri3);
     
-    // change color of vertice
     float vertices[] = {
-      -0.5f, -0.5f, 0.0f, tri1.x, tri1.y, tri1.z,
-       0.5f, -0.5f, 0.0f, tri2.x, tri2.y, tri2.z,
-       0.0f,  0.5f, 0.0f, tri3.x, tri3.y, tri3.z
+      -0.8f, -0.5f, 0.0f, tri1.x, tri1.y, tri1.z,
+      -0.6f,  0.5f, 0.0f, tri2.x, tri2.y, tri2.z,
+      -0.4f, -0.5f, 0.0f, tri3.x, tri3.y, tri3.z,
+      -0.2f,  0.5f, 0.0f, tri1.x, tri1.y, tri1.z,
+      -0.0f, -0.5f, 0.0f, tri2.x, tri2.y, tri2.z,
+       0.2f,  0.5f, 0.0f, tri3.x, tri3.y, tri3.z,
+       0.4f, -0.5f, 0.0f, tri1.x, tri1.y, tri1.z,
+       0.6f,  0.5f, 0.0f, tri2.x, tri2.y, tri2.z,
+       0.8f, -0.5f, 0.0f, tri3.x, tri3.y, tri3.z
     };
     // Copy vertices to buffer
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -109,9 +133,19 @@ int main() {
     glClear(GL_COLOR_BUFFER_BIT);
 
     glBindVertexArray(VAO);
-    if (radioMark == 0) glDrawArrays(GL_TRIANGLES, 0, 3);
-    if (radioMark == 1) glDrawArrays(GL_LINES, 0, 2);
-    if (radioMark == 2) glDrawArrays(GL_POINTS, 0, 3);
+    if (radioMark == 0) {
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+      glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(triangleIndices), triangleIndices, GL_STATIC_DRAW);
+      glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0);
+    } else if (radioMark == 1) {
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+      glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(lineIndices), lineIndices, GL_STATIC_DRAW);
+      glDrawElements(GL_LINES, 16, GL_UNSIGNED_INT, 0);
+    } else if (radioMark == 2) {
+      glBindBuffer(GL_ARRAY_BUFFER, VBO);
+      glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+      glDrawArrays(GL_POINTS, 0, 9); 
+    }
     // check out triggerations & render
     
     ImGui::Render();
