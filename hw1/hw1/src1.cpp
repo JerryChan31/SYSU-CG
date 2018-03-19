@@ -3,28 +3,10 @@
 #include <iostream>
 #include "imgui.h"
 #include "imgui_impl_glfw_gl3.h"
+#include "shader.h"
 using namespace std;
 #define WINDOW_WIDTH 1200
 #define WINDOW_HEIGHT 600
-
-// Shader's src code
-const char* vertex_shader_src = 
-"#version 330 core\n"
-"layout(location = 0) in vec3 aPos;\n"
-"layout(location = 1) in vec3 aColor;\n"
-"out vec3 ourColor;\n"
-"void main() {\n"
-"  gl_Position = vec4(aPos, 1.0);\n"
-"  ourColor = aColor;\n"
-"}\n\0";
-
-const char* fragment_shader_src = 
-"#version 330 core\n"
-"out vec4 FragColor;\n"
-"in vec3 ourColor;\n"
-"void main() {\n"
-"   FragColor = vec4(ourColor, 1.0);\n"
-"}\n\0";
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
@@ -63,60 +45,50 @@ int main() {
   ImVec4 tri1 = ImVec4(1.0f, 0.0f, 0.0f, 1.00f);
   ImVec4 tri2 = ImVec4(0.0f, 1.0f, 0.0f, 1.00f);
   ImVec4 tri3 = ImVec4(0.0f, 0.0f, 1.0f, 1.00f);
-  float triangleVertices[] = {
-    -0.5f, -0.5f, 0.0f, tri1.x, tri1.y, tri1.z,
-    0.5f, -0.5f, 0.0f, tri2.x, tri2.y, tri2.z,
-    0.0f,  0.5f, 0.0f, tri3.x, tri3.y, tri3.z
+  float vertices[] = {
+    -0.8f, -0.5f, 0.0f, tri1.x, tri1.y, tri1.z,
+    -0.6f,  0.5f, 0.0f, tri2.x, tri2.y, tri2.z,
+    -0.4f, -0.5f, 0.0f, tri3.x, tri3.y, tri3.z,
+    -0.2f,  0.5f, 0.0f, tri1.x, tri1.y, tri1.z,
+    -0.0f, -0.5f, 0.0f, tri2.x, tri2.y, tri2.z,
+     0.2f,  0.5f, 0.0f, tri3.x, tri3.y, tri3.z,
+     0.4f, -0.5f, 0.0f, tri1.x, tri1.y, tri1.z,
+     0.6f,  0.5f, 0.0f, tri2.x, tri2.y, tri2.z,
+     0.8f, -0.5f, 0.0f, tri3.x, tri3.y, tri3.z
   };
+  unsigned int triangleIndices[] = {
+    0, 1, 2, 
+    3, 4, 5,
+    6, 7, 8
+  };
+  unsigned int lineIndices[] = {
+    0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8
+  };
+  ImVec4 lineVertex1 = ImVec4(1.5f, 1.5f, 0.0f, 1.0f);
+  ImVec4 lineVertex2 = ImVec4(1.5f, 1.8f, 0.0f, 1.0f);
+
+  unsigned int EBO;
+  glGenBuffers(1, &EBO);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(triangleIndices), triangleIndices, GL_STATIC_DRAW);
 
   unsigned int VBO;
   // generate VBO & bind to buffer
   glGenBuffers(1, &VBO);
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(triangleVertices), triangleVertices, GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-  // compile shaders
-  unsigned int vertexShader;
-  vertexShader = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(vertexShader, 1, &vertex_shader_src, NULL);
-  glCompileShader(vertexShader);
-
-  unsigned int fragmentShader;
-  fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(fragmentShader, 1, &fragment_shader_src, NULL);
-  glCompileShader(fragmentShader);
-
-  int success;
-  char infoLog[512];
-  glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-  if (!success) {
-    glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-    cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << endl;
-  }
-  glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-  if (!success) {
-    glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-    cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << endl;
-  }
-
-  // create shader program obj
-  unsigned int shaderProgram;
-  shaderProgram = glCreateProgram();
-  glAttachShader(shaderProgram, vertexShader);
-  glAttachShader(shaderProgram, fragmentShader);
-  glLinkProgram(shaderProgram);
-  glUseProgram(shaderProgram);
-  // delete shaders
-  glDeleteShader(vertexShader);
-  glDeleteShader(fragmentShader);
+  // create shader with Shader class
+  Shader shader("vShaderSrc.txt", "fShaderSrc.txt");
+  shader.use();
 
   // create VAO
   unsigned int VAO;
   glGenVertexArrays(1, &VAO);
   glBindVertexArray(VAO);
-  // Copy triangleVertices to buffer
+  // Copy vertices to buffer
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(triangleVertices), triangleVertices, GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
     
   // position
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
@@ -125,35 +97,57 @@ int main() {
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
 
+  int radioMark = 0;
+
   // ---- render loop ----
   while (!glfwWindowShouldClose(window)) {
+    // process input from keyboard/mouse/other
+    processInput(window);
+    glfwPollEvents();
     // init ImGui
     ImGui_ImplGlfwGL3_NewFrame();
-    ImGui::SetWindowSize(ImVec2(300, 100));
+    ImGui::SetWindowSize(ImVec2(300, 200));
+    ImGui::RadioButton("Show Triangle", &radioMark, 0);
+    ImGui::RadioButton("Show Line", &radioMark, 1);
+    ImGui::RadioButton("Show Points", &radioMark, 2);
     ImGui::ColorEdit3("Left", (float*)&tri1);
     ImGui::ColorEdit3("Right", (float*)&tri2);
     ImGui::ColorEdit3("Top", (float*)&tri3);
-    // process input from keyboard/mouse/other
-    processInput(window);
-
-    // change color of vertice
-    float triangleVertices[] = {
-      -0.5f, -0.5f, 0.0f, tri1.x, tri1.y, tri1.z,
-       0.5f, -0.5f, 0.0f, tri2.x, tri2.y, tri2.z,
-       0.0f,  0.5f, 0.0f, tri3.x, tri3.y, tri3.z
+    
+    float vertices[] = {
+      -0.8f, -0.5f, 0.0f, tri1.x, tri1.y, tri1.z,
+      -0.6f,  0.5f, 0.0f, tri2.x, tri2.y, tri2.z,
+      -0.4f, -0.5f, 0.0f, tri3.x, tri3.y, tri3.z,
+      -0.2f,  0.5f, 0.0f, tri1.x, tri1.y, tri1.z,
+      -0.0f, -0.5f, 0.0f, tri2.x, tri2.y, tri2.z,
+       0.2f,  0.5f, 0.0f, tri3.x, tri3.y, tri3.z,
+       0.4f, -0.5f, 0.0f, tri1.x, tri1.y, tri1.z,
+       0.6f,  0.5f, 0.0f, tri2.x, tri2.y, tri2.z,
+       0.8f, -0.5f, 0.0f, tri3.x, tri3.y, tri3.z
     };
-    // Copy triangleVertices to buffer
+    // Copy vertices to buffer
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(triangleVertices), triangleVertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
-
+    if (radioMark == 0) {
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+      glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(triangleIndices), triangleIndices, GL_STATIC_DRAW);
+      glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0);
+    } else if (radioMark == 1) {
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+      glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(lineIndices), lineIndices, GL_STATIC_DRAW);
+      glDrawElements(GL_LINES, 16, GL_UNSIGNED_INT, 0);
+    } else if (radioMark == 2) {
+      glBindBuffer(GL_ARRAY_BUFFER, VBO);
+      glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+      glDrawArrays(GL_POINTS, 0, 9); 
+    }
     // check out triggerations & render
-    glfwPollEvents();
+    
     ImGui::Render();
     ImGui_ImplGlfwGL3_RenderDrawData(ImGui::GetDrawData());
     glfwSwapBuffers(window);

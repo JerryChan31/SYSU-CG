@@ -33,13 +33,13 @@
     <ClCompile Include="imgui_impl_glfw_gl3.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="shader.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
       <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="imconfig.h">
-      <Filter>源文件</Filter>
     </ClInclude>
     <ClInclude Include="imgui.h">
       <Filter>头文件</Filter>
@@ -59,10 +59,27 @@
     <ClInclude Include="imgui_impl_glfw_gl3.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="imconfig.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="shader.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="resource1.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="hw1.rc">
       <Filter>资源文件</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="vShaderSrc.txt">
+      <Filter>资源文件</Filter>
+    </Text>
+    <Text Include="fShaderSrc.txt">
+      <Filter>资源文件</Filter>
+    </Text>
   </ItemGroup>
 </Project>
