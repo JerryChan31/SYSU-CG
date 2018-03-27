@@ -11,7 +11,8 @@ using namespace std;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
-vector<float> Bresenham(int x0, int y0, int x1, int y1);
+vector<float> BresenhamLine(int x0, int y0, int x1, int y1);
+vector<float> BresenhamCircle(int x, int y, int radius);
 
 int main() {
   glfwInit();
@@ -38,22 +39,17 @@ int main() {
   // shader init
   Shader shader("vShaderSrc.txt", "fShaderSrc.txt");
   // ======================================
-  //// Setup ImGui bindings
-  //ImGui::CreateContext();
-  //ImGuiIO& io = ImGui::GetIO(); (void)io;
-  //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
-  //ImGui_ImplGlfwGL3_Init(window, true);
-  //ImGui::StyleColorsDark();
-
-  vector<float> points = Bresenham(-600, -300, 600, 300);
-  //float* vertices = new float[points.size()];
-  //memcpy(vertices, &points[0], points.size()*sizeof(float));
+  // Setup ImGui bindings
+  ImGui::CreateContext();
+  ImGuiIO& io = ImGui::GetIO(); (void)io;
+  io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
+  ImGui_ImplGlfwGL3_Init(window, true);
+  ImGui::StyleColorsDark();
 
   unsigned int VBO;
   // generate VBO & bind to buffer
   glGenBuffers(1, &VBO);
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  //glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
   // create shader with Shader class
   shader.use();
@@ -63,58 +59,84 @@ int main() {
   glGenVertexArrays(1, &VAO);
   glBindVertexArray(VAO);
 
+  int radioMark = 1;
+  int cicleInput[3];
+  cicleInput[0] = 0;
+  cicleInput[1] = 0;
+  cicleInput[2] = 100;
   // ---- render loop ----
   while (!glfwWindowShouldClose(window)) {
+    vector<vector<float>> triangle;
     // process input from keyboard/mouse/other
     processInput(window);
     glfwPollEvents();
-    // init ImGui
-    //ImGui_ImplGlfwGL3_NewFrame();
-    //ImGui::SetWindowSize(ImVec2(300, 150));
-    //ImGui::Checkbox("SameColor", &sameColor);
-    //ImGui::RadioButton("Show Triangle", &radioMark, 0);
-    //ImGui::RadioButton("Show Line", &radioMark, 1);
-    //ImGui::RadioButton("Show Points", &radioMark, 2);
-    //if (!sameColor) {
-    //  ImGui::ColorEdit3("Left", (float*)&tri1);
-    //  ImGui::ColorEdit3("Right", (float*)&tri2);
-    //  ImGui::ColorEdit3("Top", (float*)&tri3);
-    //} else {
-    //  ImGui::ColorEdit3("All Vertices", (float*)&tri1);
-    //  tri2 = tri1;
-    //  tri3 = tri1;
-    //}
+    ImGui_ImplGlfwGL3_NewFrame();
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-    shader.use();
-    for (int i = 0; i < points.size(); i+=2) {
-      float vertices[] = {points[i], points[i+1], 0.0f, 1.0f, 1.0f, 1.0f};
-      shader.use();
-      glBindVertexArray(VAO);
-      glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-      // position
-      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-      glEnableVertexAttribArray(0);
-      //color
-      glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-      glEnableVertexAttribArray(1);
-      glBindBuffer(GL_ARRAY_BUFFER, VBO);
-      glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-      glBindBuffer(GL_ARRAY_BUFFER, VBO);
-      glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-      glDrawArrays(GL_POINTS, 0, 1);
-    }
+    // init ImGui
+    {
+      ImGui::RadioButton("Triangle", &radioMark, 0);
+      ImGui::RadioButton("Circle", &radioMark, 1);
+      ImGui::RadioButton("Rasterize", &radioMark, 2);
+      if (radioMark == 0) {
+        triangle.push_back(BresenhamLine(0, 150, -100, -100));
+        triangle.push_back(BresenhamLine(0, 150, 100, -100));
+        triangle.push_back(BresenhamLine(-100, -100, 100, -100));
+        shader.use();
+        for (size_t i = 0; i < triangle.size(); i++) {
+          for (size_t j = 0; j < triangle[i].size(); j += 2) {
+            float vertices[] = { triangle[i][j], triangle[i][j + 1], 0.0f, 1.0f, 1.0f, 1.0f };
+            shader.use();
+            glBindVertexArray(VAO);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+            // position
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+            glEnableVertexAttribArray(0);
+            //color
+            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+            glEnableVertexAttribArray(1);
+            glBindBuffer(GL_ARRAY_BUFFER, VBO);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+            glBindBuffer(GL_ARRAY_BUFFER, VBO);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+            glDrawArrays(GL_POINTS, 0, 1);
+          }
+        }
+      } else if (radioMark == 1) {
+        
+        
+        ImGui::InputInt3("X,Y,Radius", cicleInput, 0);
+        vector<float> circle = BresenhamCircle(cicleInput[0], cicleInput[1], cicleInput[2]);
+        for (size_t i = 0; i < circle.size(); i += 2) {
+          float vertices[] = { circle[i], circle[i + 1], 0.0f, 1.0f, 1.0f, 1.0f };
+          shader.use();
+          glBindVertexArray(VAO);
+          glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+          // position
+          glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+          glEnableVertexAttribArray(0);
+          //color
+          glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+          glEnableVertexAttribArray(1);
+          glBindBuffer(GL_ARRAY_BUFFER, VBO);
+          glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+          glBindBuffer(GL_ARRAY_BUFFER, VBO);
+          glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+          glDrawArrays(GL_POINTS, 0, 1);
+         }
+      }
+    } 
     // Copy vertices to buffer
 
     // check out triggerations & render
     
-    //ImGui::Render();
-    //ImGui_ImplGlfwGL3_RenderDrawData(ImGui::GetDrawData());
+    ImGui::Render();
+    ImGui_ImplGlfwGL3_RenderDrawData(ImGui::GetDrawData());
     glfwSwapBuffers(window);
   }
   // release sources
-  //ImGui_ImplGlfwGL3_Shutdown();
-  //ImGui::DestroyContext();
+  ImGui_ImplGlfwGL3_Shutdown();
+  ImGui::DestroyContext();
   glfwTerminate();
   return 0;
 }
@@ -130,27 +152,106 @@ void processInput(GLFWwindow* window) {
   }
 }
 
-vector<float> Bresenham(int x0, int y0, int x1, int y1) {
+vector<float> BresenhamLine(int x0, int y0, int x1, int y1) {
   vector<float> result;
-  int deltaX = x1 - x0;
-  int deltaY = y1 - y0;
+  int deltaX = (x1 >= x0 ? x1 - x0 : x0 - x1);
+  int deltaY = (y1 >= y0 ? y1 - y0 : y0 - y1);
   int p = 2 * deltaY - deltaX;
   int xi = x0, yi = y0;
-  result.push_back((float)xi / (float)WINDOW_WIDTH);
-  result.push_back((float)yi / (float)WINDOW_HEIGHT);
-  while (xi != x1 && yi != y1) {
-    if (p <= 0) {
-      xi += 1;
-      p = p + 2 * deltaY;
-      result.push_back((float)xi/(float)WINDOW_WIDTH);
-      result.push_back((float)yi / (float)WINDOW_HEIGHT);
-    } else {
-      xi += 1;
-      yi += 1;
-      p = p + 2 * deltaY - 2 * deltaX;
-      result.push_back((float)xi / (float)WINDOW_WIDTH*2);
-      result.push_back((float)yi / (float)WINDOW_HEIGHT*2);
+  int xinc, yinc;
+  xinc = (x1 >= x0 ? 1 : -1);
+  yinc = (y1 >= y0 ? 1 : -1);
+  result.push_back((float)xi / (float)WINDOW_WIDTH * 2);
+  result.push_back((float)yi / (float)WINDOW_HEIGHT * 2);
+  if (deltaX > deltaY) {
+    while (xi != x1) {
+      if (p <= 0) {
+        p = p + 2 * deltaY;
+      } else {
+        yi += yinc;
+        p = p + 2 * deltaY - 2 * deltaX;
+      }
+      xi += xinc;
+      result.push_back((float)xi / (float)WINDOW_WIDTH * 2);
+      result.push_back((float)yi / (float)WINDOW_HEIGHT * 2);
     }
+  } else {
+    while (yi != y1) {
+      if (p <= 0) {
+        p = p + 2 * deltaX;
+      } else {
+        xi += xinc;
+        p = p + 2 * deltaX - 2 * deltaY;
+      }
+      yi += yinc;
+      result.push_back((float)xi / (float)WINDOW_WIDTH * 2);
+      result.push_back((float)yi / (float)WINDOW_HEIGHT * 2);
+    }
+  }
+  //success
+  return result;
+}
+
+vector<float> BresenhamCircle(int x, int y, int radius) {
+  vector<float> result;
+  int xi = 0, yi = radius, rec = 0;
+  int d = 5 - 4 * radius;
+  //1
+  result.push_back((float)(xi + x) / (float)WINDOW_WIDTH);
+  result.push_back((float)(yi - y) / (float)WINDOW_HEIGHT);
+  //2
+  result.push_back((float)(-xi + x) / (float)WINDOW_WIDTH);
+  result.push_back((float)(yi - y) / (float)WINDOW_HEIGHT);
+  //3
+  result.push_back((float)(xi + x)/ (float)WINDOW_WIDTH);
+  result.push_back((float)(-yi - y) / (float)WINDOW_HEIGHT);
+  //4
+  result.push_back((float)(-xi + x) / (float)WINDOW_WIDTH);
+  result.push_back((float)(-yi - y) / (float)WINDOW_HEIGHT);
+  //5
+  result.push_back((float)(yi + x) / (float)WINDOW_WIDTH);
+  result.push_back((float)(xi - y) / (float)WINDOW_HEIGHT);
+  //6
+  result.push_back((float)(-yi + x) / (float)WINDOW_WIDTH);
+  result.push_back((float)(xi - y) / (float)WINDOW_HEIGHT);
+  //7
+  result.push_back((float)(yi + x) / (float)WINDOW_WIDTH);
+  result.push_back((float)(-xi - y) / (float)WINDOW_HEIGHT);
+  //8
+  result.push_back((float)(-yi + x) / (float)WINDOW_WIDTH);
+  result.push_back((float)(-xi - y) / (float)WINDOW_HEIGHT);
+  while (xi <= yi) {
+    if (d <= 0) {
+      d += 8 * xi + 12;
+    } else {
+      d += 8 * (xi - yi) + 20;
+      yi--;
+    }
+    xi++;
+    //1
+    result.push_back((float)(xi + x) / (float)WINDOW_WIDTH);
+    result.push_back((float)(yi - y) / (float)WINDOW_HEIGHT);
+    //2
+    result.push_back((float)(-xi + x) / (float)WINDOW_WIDTH);
+    result.push_back((float)(yi - y) / (float)WINDOW_HEIGHT);
+    //3
+    result.push_back((float)(xi + x) / (float)WINDOW_WIDTH);
+    result.push_back((float)(-yi - y) / (float)WINDOW_HEIGHT);
+    //4
+    result.push_back((float)(-xi + x) / (float)WINDOW_WIDTH);
+    result.push_back((float)(-yi - y) / (float)WINDOW_HEIGHT);
+    //5
+    result.push_back((float)(yi + x) / (float)WINDOW_WIDTH);
+    result.push_back((float)(xi - y) / (float)WINDOW_HEIGHT);
+    //6
+    result.push_back((float)(-yi + x) / (float)WINDOW_WIDTH);
+    result.push_back((float)(xi - y) / (float)WINDOW_HEIGHT);
+    //7
+    result.push_back((float)(yi + x) / (float)WINDOW_WIDTH);
+    result.push_back((float)(-xi - y) / (float)WINDOW_HEIGHT);
+    //8
+    result.push_back((float)(-yi + x) / (float)WINDOW_WIDTH);
+    result.push_back((float)(-xi - y) / (float)WINDOW_HEIGHT);
   }
   return result;
 }
