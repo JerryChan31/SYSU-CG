@@ -59,7 +59,7 @@ int main() {
   glGenVertexArrays(1, &VAO);
   glBindVertexArray(VAO);
 
-  int radioMark = 1;
+  int radioMark = 2;
   int cicleInput[3];
   cicleInput[0] = 0;
   cicleInput[1] = 0;
@@ -102,9 +102,7 @@ int main() {
             glDrawArrays(GL_POINTS, 0, 1);
           }
         }
-      } else if (radioMark == 1) {
-        
-        
+      } else if (radioMark == 1) { 
         ImGui::InputInt3("X,Y,Radius", cicleInput, 0);
         vector<float> circle = BresenhamCircle(cicleInput[0], cicleInput[1], cicleInput[2]);
         for (size_t i = 0; i < circle.size(); i += 2) {
@@ -124,6 +122,53 @@ int main() {
           glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
           glDrawArrays(GL_POINTS, 0, 1);
          }
+      } else if (radioMark == 2) {
+        triangle.push_back(BresenhamLine(0, 150, -100, -100));
+        triangle.push_back(BresenhamLine(0, 150, 100, -100));
+        triangle.push_back(BresenhamLine(-100, -100, 100, -100));
+        shader.use();
+        for (size_t i = 0; i < triangle.size(); i++) {
+          for (size_t j = 0; j < triangle[i].size(); j += 2) {
+            float vertices[] = { triangle[i][j], triangle[i][j + 1], 0.0f, 1.0f, 1.0f, 1.0f };
+            shader.use();
+            glBindVertexArray(VAO);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+            // position
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+            glEnableVertexAttribArray(0);
+            //color
+            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+            glEnableVertexAttribArray(1);
+            glBindBuffer(GL_ARRAY_BUFFER, VBO);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+            glBindBuffer(GL_ARRAY_BUFFER, VBO);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+            glDrawArrays(GL_POINTS, 0, 1);
+          }
+        }
+        // Edge Walking
+        for (size_t i = 1; i < triangle[0].size()+1; i+=2) {
+          float xi = triangle[0][i-1];
+          while (triangle[1][i-1] - xi > 0.00001) {
+            float vertices[] = { xi, triangle[0][i], 0.0f, 1.0f, 1.0f, 1.0f };
+            shader.use();
+            glBindVertexArray(VAO);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+            // position
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+            glEnableVertexAttribArray(0);
+            //color
+            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+            glEnableVertexAttribArray(1);
+            glBindBuffer(GL_ARRAY_BUFFER, VBO);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+            glBindBuffer(GL_ARRAY_BUFFER, VBO);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+            glDrawArrays(GL_POINTS, 0, 1);
+
+            xi += (float)1.0 / (float)WINDOW_WIDTH;
+          }
+        }
       }
     } 
     // Copy vertices to buffer
@@ -197,29 +242,29 @@ vector<float> BresenhamCircle(int x, int y, int radius) {
   int xi = 0, yi = radius, rec = 0;
   int d = 5 - 4 * radius;
   //1
-  result.push_back((float)(xi + x) / (float)WINDOW_WIDTH);
-  result.push_back((float)(yi - y) / (float)WINDOW_HEIGHT);
+  result.push_back((float)(xi + x) / (float)WINDOW_WIDTH * 2);
+  result.push_back((float)(yi + y) / (float)WINDOW_HEIGHT * 2);
   //2
-  result.push_back((float)(-xi + x) / (float)WINDOW_WIDTH);
-  result.push_back((float)(yi - y) / (float)WINDOW_HEIGHT);
+  result.push_back((float)(-xi + x) / (float)WINDOW_WIDTH * 2);
+  result.push_back((float)(yi + y) / (float)WINDOW_HEIGHT * 2);
   //3
-  result.push_back((float)(xi + x)/ (float)WINDOW_WIDTH);
-  result.push_back((float)(-yi - y) / (float)WINDOW_HEIGHT);
+  result.push_back((float)(xi + x)/ (float)WINDOW_WIDTH * 2);
+  result.push_back((float)(-yi + y) / (float)WINDOW_HEIGHT * 2);
   //4
-  result.push_back((float)(-xi + x) / (float)WINDOW_WIDTH);
-  result.push_back((float)(-yi - y) / (float)WINDOW_HEIGHT);
+  result.push_back((float)(-xi + x) / (float)WINDOW_WIDTH * 2);
+  result.push_back((float)(-yi + y) / (float)WINDOW_HEIGHT * 2);
   //5
-  result.push_back((float)(yi + x) / (float)WINDOW_WIDTH);
-  result.push_back((float)(xi - y) / (float)WINDOW_HEIGHT);
+  result.push_back((float)(yi + x) / (float)WINDOW_WIDTH * 2);
+  result.push_back((float)(xi + y) / (float)WINDOW_HEIGHT * 2);
   //6
-  result.push_back((float)(-yi + x) / (float)WINDOW_WIDTH);
-  result.push_back((float)(xi - y) / (float)WINDOW_HEIGHT);
+  result.push_back((float)(-yi + x) / (float)WINDOW_WIDTH * 2);
+  result.push_back((float)(xi + y) / (float)WINDOW_HEIGHT * 2);
   //7
-  result.push_back((float)(yi + x) / (float)WINDOW_WIDTH);
-  result.push_back((float)(-xi - y) / (float)WINDOW_HEIGHT);
+  result.push_back((float)(yi + x) / (float)WINDOW_WIDTH * 2);
+  result.push_back((float)(-xi + y) / (float)WINDOW_HEIGHT * 2);
   //8
-  result.push_back((float)(-yi + x) / (float)WINDOW_WIDTH);
-  result.push_back((float)(-xi - y) / (float)WINDOW_HEIGHT);
+  result.push_back((float)(-yi + x) / (float)WINDOW_WIDTH * 2);
+  result.push_back((float)(-xi + y) / (float)WINDOW_HEIGHT * 2);
   while (xi <= yi) {
     if (d <= 0) {
       d += 8 * xi + 12;
@@ -230,28 +275,28 @@ vector<float> BresenhamCircle(int x, int y, int radius) {
     xi++;
     //1
     result.push_back((float)(xi + x) / (float)WINDOW_WIDTH);
-    result.push_back((float)(yi - y) / (float)WINDOW_HEIGHT);
+    result.push_back((float)(yi + y) / (float)WINDOW_HEIGHT);
     //2
     result.push_back((float)(-xi + x) / (float)WINDOW_WIDTH);
-    result.push_back((float)(yi - y) / (float)WINDOW_HEIGHT);
+    result.push_back((float)(yi + y) / (float)WINDOW_HEIGHT);
     //3
     result.push_back((float)(xi + x) / (float)WINDOW_WIDTH);
-    result.push_back((float)(-yi - y) / (float)WINDOW_HEIGHT);
+    result.push_back((float)(-yi + y) / (float)WINDOW_HEIGHT);
     //4
     result.push_back((float)(-xi + x) / (float)WINDOW_WIDTH);
-    result.push_back((float)(-yi - y) / (float)WINDOW_HEIGHT);
+    result.push_back((float)(-yi + y) / (float)WINDOW_HEIGHT);
     //5
     result.push_back((float)(yi + x) / (float)WINDOW_WIDTH);
-    result.push_back((float)(xi - y) / (float)WINDOW_HEIGHT);
+    result.push_back((float)(xi + y) / (float)WINDOW_HEIGHT);
     //6
     result.push_back((float)(-yi + x) / (float)WINDOW_WIDTH);
-    result.push_back((float)(xi - y) / (float)WINDOW_HEIGHT);
+    result.push_back((float)(xi + y) / (float)WINDOW_HEIGHT);
     //7
     result.push_back((float)(yi + x) / (float)WINDOW_WIDTH);
-    result.push_back((float)(-xi - y) / (float)WINDOW_HEIGHT);
+    result.push_back((float)(-xi + y) / (float)WINDOW_HEIGHT);
     //8
     result.push_back((float)(-yi + x) / (float)WINDOW_WIDTH);
-    result.push_back((float)(-xi - y) / (float)WINDOW_HEIGHT);
+    result.push_back((float)(-xi + y) / (float)WINDOW_HEIGHT);
   }
   return result;
 }
