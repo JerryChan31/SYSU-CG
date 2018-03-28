@@ -98,6 +98,7 @@ int main() {
   glEnableVertexAttribArray(1);
 
   int radioMark = 0;
+  bool sameColor = true;
 
   // ---- render loop ----
   while (!glfwWindowShouldClose(window)) {
@@ -106,14 +107,20 @@ int main() {
     glfwPollEvents();
     // init ImGui
     ImGui_ImplGlfwGL3_NewFrame();
-    ImGui::SetWindowSize(ImVec2(300, 200));
+    ImGui::SetWindowSize(ImVec2(300, 150));
+    ImGui::Checkbox("SameColor", &sameColor);
     ImGui::RadioButton("Show Triangle", &radioMark, 0);
     ImGui::RadioButton("Show Line", &radioMark, 1);
     ImGui::RadioButton("Show Points", &radioMark, 2);
-    ImGui::ColorEdit3("Left", (float*)&tri1);
-    ImGui::ColorEdit3("Right", (float*)&tri2);
-    ImGui::ColorEdit3("Top", (float*)&tri3);
-    
+    if (!sameColor) {
+      ImGui::ColorEdit3("Left", (float*)&tri1);
+      ImGui::ColorEdit3("Right", (float*)&tri2);
+      ImGui::ColorEdit3("Top", (float*)&tri3);
+    } else {
+      ImGui::ColorEdit3("All Vertices", (float*)&tri1);
+      tri2 = tri1;
+      tri3 = tri1;
+    }
     float vertices[] = {
       -0.8f, -0.5f, 0.0f, tri1.x, tri1.y, tri1.z,
       -0.6f,  0.5f, 0.0f, tri2.x, tri2.y, tri2.z,
