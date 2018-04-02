@@ -1,11 +1,14 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include<glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include "imgui.h"
 #include "imgui_impl_glfw_gl3.h"
 #include "shader.h"
 using namespace std;
-#define WINDOW_WIDTH 1200
+#define WINDOW_WIDTH  600
 #define WINDOW_HEIGHT 600
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -41,55 +44,47 @@ int main() {
   ImGui_ImplGlfwGL3_Init(window, true);
   ImGui::StyleColorsDark();
 
+  Shader shader("vShaderSrc.txt", "fShaderSrc.txt");
+  
   // Triangle info
   ImVec4 tri1 = ImVec4(1.0f, 0.0f, 0.0f, 1.00f);
   ImVec4 tri2 = ImVec4(0.0f, 1.0f, 0.0f, 1.00f);
   ImVec4 tri3 = ImVec4(0.0f, 0.0f, 1.0f, 1.00f);
+  ImVec4 tri4 = ImVec4(0.0f, 1.0f, 0.0f, 1.00f);
   float vertices[] = {
-    -0.8f, -0.5f, 0.0f, tri1.x, tri1.y, tri1.z,
-    -0.6f,  0.5f, 0.0f, tri2.x, tri2.y, tri2.z,
-    -0.4f, -0.5f, 0.0f, tri3.x, tri3.y, tri3.z,
-    -0.2f,  0.5f, 0.0f, tri1.x, tri1.y, tri1.z,
-    -0.0f, -0.5f, 0.0f, tri2.x, tri2.y, tri2.z,
-     0.2f,  0.5f, 0.0f, tri3.x, tri3.y, tri3.z,
-     0.4f, -0.5f, 0.0f, tri1.x, tri1.y, tri1.z,
-     0.6f,  0.5f, 0.0f, tri2.x, tri2.y, tri2.z,
-     0.8f, -0.5f, 0.0f, tri3.x, tri3.y, tri3.z
+    -0.2f, -0.2f, -0.2f, tri1.x, tri1.y, tri1.z,
+    -0.2f, -0.2f,  0.2f, tri2.x, tri2.y, tri2.z,
+    -0.2f,  0.2f, -0.2f, tri3.x, tri3.y, tri3.z,
+    -0.2f,  0.2f,  0.2f, tri4.x, tri4.y, tri4.z,
+     0.2f, -0.2f, -0.2f, tri1.x, tri1.y, tri1.z,
+     0.2f, -0.2f,  0.2f, tri2.x, tri2.y, tri2.z,
+     0.2f,  0.2f, -0.2f, tri3.x, tri3.y, tri3.z,
+     0.2f,  0.2f,  0.2f, tri4.x, tri4.y, tri4.z,
   };
   unsigned int triangleIndices[] = {
-    0, 1, 2, 
-    3, 4, 5,
-    6, 7, 8
+    0, 1, 3, 
+    0, 3, 2,
+    0, 1, 5, 
+    0, 5, 4,
+    3, 2, 7,
+    2, 7, 6,
+    3, 1, 5,
+    3, 5, 7,
+    0, 2, 6,
+    0, 4, 6,
+    5, 4, 7,
+    4, 7, 6
   };
-  unsigned int lineIndices[] = {
-    0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8
-  };
-  ImVec4 lineVertex1 = ImVec4(1.5f, 1.5f, 0.0f, 1.0f);
-  ImVec4 lineVertex2 = ImVec4(1.5f, 1.8f, 0.0f, 1.0f);
 
-  unsigned int EBO;
+  unsigned int VAO, VBO, EBO;
+  glGenVertexArrays(1, &VAO);
+  glGenBuffers(1, &VBO);
   glGenBuffers(1, &EBO);
+  glBindVertexArray(VAO);
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(triangleIndices), triangleIndices, GL_STATIC_DRAW);
-
-  unsigned int VBO;
-  // generate VBO & bind to buffer
-  glGenBuffers(1, &VBO);
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-  // create shader with Shader class
-  Shader shader("vShaderSrc.txt", "fShaderSrc.txt");
-  shader.use();
-
-  // create VAO
-  unsigned int VAO;
-  glGenVertexArrays(1, &VAO);
-  glBindVertexArray(VAO);
-  // Copy vertices to buffer
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    
   // position
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
@@ -97,9 +92,9 @@ int main() {
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
 
+  glm::mat4 view;
+  bool depth = true;
   int radioMark = 0;
-  bool sameColor = true;
-
   // ---- render loop ----
   while (!glfwWindowShouldClose(window)) {
     // process input from keyboard/mouse/other
@@ -108,51 +103,52 @@ int main() {
     // init ImGui
     ImGui_ImplGlfwGL3_NewFrame();
     ImGui::SetWindowSize(ImVec2(300, 150));
-    ImGui::Checkbox("SameColor", &sameColor);
-    ImGui::RadioButton("Show Triangle", &radioMark, 0);
-    ImGui::RadioButton("Show Line", &radioMark, 1);
-    ImGui::RadioButton("Show Points", &radioMark, 2);
-    if (!sameColor) {
-      ImGui::ColorEdit3("Left", (float*)&tri1);
-      ImGui::ColorEdit3("Right", (float*)&tri2);
-      ImGui::ColorEdit3("Top", (float*)&tri3);
-    } else {
-      ImGui::ColorEdit3("All Vertices", (float*)&tri1);
-      tri2 = tri1;
-      tri3 = tri1;
-    }
-    float vertices[] = {
-      -0.8f, -0.5f, 0.0f, tri1.x, tri1.y, tri1.z,
-      -0.6f,  0.5f, 0.0f, tri2.x, tri2.y, tri2.z,
-      -0.4f, -0.5f, 0.0f, tri3.x, tri3.y, tri3.z,
-      -0.2f,  0.5f, 0.0f, tri1.x, tri1.y, tri1.z,
-      -0.0f, -0.5f, 0.0f, tri2.x, tri2.y, tri2.z,
-       0.2f,  0.5f, 0.0f, tri3.x, tri3.y, tri3.z,
-       0.4f, -0.5f, 0.0f, tri1.x, tri1.y, tri1.z,
-       0.6f,  0.5f, 0.0f, tri2.x, tri2.y, tri2.z,
-       0.8f, -0.5f, 0.0f, tri3.x, tri3.y, tri3.z
-    };
-    // Copy vertices to buffer
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    ImGui::Checkbox("DepthTest", &depth);
+    ImGui::RadioButton("Translation", &radioMark, 0);
+    ImGui::RadioButton("Rotation", &radioMark, 1);
+    ImGui::RadioButton("Scaling", &radioMark, 2);
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-
-    glBindVertexArray(VAO);
-    if (radioMark == 0) {
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-      glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(triangleIndices), triangleIndices, GL_STATIC_DRAW);
-      glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0);
-    } else if (radioMark == 1) {
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-      glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(lineIndices), lineIndices, GL_STATIC_DRAW);
-      glDrawElements(GL_LINES, 16, GL_UNSIGNED_INT, 0);
-    } else if (radioMark == 2) {
-      glBindBuffer(GL_ARRAY_BUFFER, VBO);
-      glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-      glDrawArrays(GL_POINTS, 0, 9); 
+    glClear(GL_DEPTH_BUFFER_BIT);
+    if (depth == true) {
+      glEnable(GL_DEPTH_TEST);
+    } else {
+      glDisable(GL_DEPTH_TEST);
     }
+    shader.use();
+    //int viewLoc = glGetUniformLocation(shader.ID, "view");
+    //glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+
+    //view = glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f),
+    //  glm::vec3(0.0f, 0.0f, 0.0f),
+    //  glm::vec3(0.0f, 1.0f, 0.0f));
+
+    glm::mat4 model(1);
+    model = glm::rotate(model, (float)glfwGetTime()*glm::radians(500.0f), glm::vec3(1.0f, -1.0f, 0.0f));
+
+    glm::mat4 view(1);
+    view = glm::translate(view, glm::vec3(0.0f, 0.5f, -30.0f));
+
+    glm::mat4 projection(1);
+    projection = glm::perspective(glm::radians(180.0f), 1.0f, 0.1f, 1000.0f);
+
+    int modelLoc = glGetUniformLocation(shader.ID, "model");
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    int viewLoc = glGetUniformLocation(shader.ID, "view");
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+    int proLoc = glGetUniformLocation(shader.ID, "projection");
+    glUniformMatrix4fv(proLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+    //glm::mat4 trans(1);
+    //trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
+    //trans = glm::rotate(trans, (float)glfwGetTime()*3, glm::vec3(1.0f, 1.0f, 1.0f));
+    //unsigned int transformLoc = glGetUniformLocation(shader.ID, "transform");
+    //glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+    glBindVertexArray(VAO);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glDrawElements(GL_TRIANGLES, 39, GL_UNSIGNED_INT, 0);
+    
     // check out triggerations & render
     
     ImGui::Render();
