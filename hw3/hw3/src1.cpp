@@ -50,7 +50,7 @@ int main() {
   ImVec4 tri1 = ImVec4(1.0f, 0.0f, 0.0f, 1.00f);
   ImVec4 tri2 = ImVec4(0.0f, 1.0f, 0.0f, 1.00f);
   ImVec4 tri3 = ImVec4(0.0f, 0.0f, 1.0f, 1.00f);
-  ImVec4 tri4 = ImVec4(0.0f, 1.0f, 0.0f, 1.00f);
+  ImVec4 tri4 = ImVec4(0.5f, 0.f, 0.5f, 1.00f);
   float vertices[] = {
     -0.2f, -0.2f, -0.2f, tri1.x, tri1.y, tri1.z,
     -0.2f, -0.2f,  0.2f, tri2.x, tri2.y, tri2.z,
@@ -94,7 +94,10 @@ int main() {
 
   glm::mat4 view;
   bool depth = true;
-  int radioMark = 0;
+  int radioMark = 2;
+  float temp = 0.0f;
+  float save = 0.0f;
+  int sign = 1;
   // ---- render loop ----
   while (!glfwWindowShouldClose(window)) {
     // process input from keyboard/mouse/other
@@ -117,22 +120,47 @@ int main() {
       glDisable(GL_DEPTH_TEST);
     }
     shader.use();
-    //int viewLoc = glGetUniformLocation(shader.ID, "view");
-    //glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-
-    //view = glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f),
-    //  glm::vec3(0.0f, 0.0f, 0.0f),
-    //  glm::vec3(0.0f, 1.0f, 0.0f));
-
     glm::mat4 model(1);
-    model = glm::rotate(model, (float)glfwGetTime()*glm::radians(500.0f), glm::vec3(1.0f, -1.0f, 0.0f));
-
     glm::mat4 view(1);
-    view = glm::translate(view, glm::vec3(0.0f, 0.5f, -30.0f));
-
     glm::mat4 projection(1);
-    projection = glm::perspective(glm::radians(180.0f), 1.0f, 0.1f, 1000.0f);
-
+    if (radioMark == 1) {
+      model = glm::rotate(model, (float)glfwGetTime()*glm::radians(1000.0f), glm::vec3(0.0f, 1.0f, 1.0f));
+      view = glm::translate(view, glm::vec3(0.0f, 0.0f, -30.0f));
+      projection = glm::perspective(glm::radians(180.0f), 1.0f, 0.1f, 1000.0f);
+    } else if (radioMark == 0) {    
+      float flag = 0.5f;
+      if (sign == 1) {
+        temp = -flag + (glfwGetTime() - save) * 0.1f;
+      }
+      if (sign == -1) {
+        temp = flag - (glfwGetTime() - save) * 0.1f;
+      }
+      if (temp > flag || temp < (-flag)) {
+        temp = (temp > 0 ? flag : -flag);
+        sign = -sign;
+        save = glfwGetTime();
+      }
+      model = glm::rotate(model, 45.0f, glm::vec3(0.0f, 1.0f, 1.0f));
+      view = glm::translate(view, glm::vec3(0.0f, temp, -30.0f));
+      projection = glm::perspective(glm::radians(180.0f), 1.0f, 0.1f, 1000.0f);
+    } else if (radioMark == 2) {
+      float flag1 = 0.9f;
+      float flag2 = 7.5f;
+      if (sign == 1) {
+        temp = flag1 + (glfwGetTime() - save) * 0.8f;
+      }
+      if (sign == -1) {
+        temp = flag2 - (glfwGetTime() - save) * 0.8f;
+      }
+      if (temp > flag2 || temp < flag1) {
+        temp = (temp > 1 ? flag2 : flag1);
+        sign = -sign;
+        save = glfwGetTime();
+      }
+      model = glm::rotate(model, glm::radians(3500.0f), glm::vec3(0.0f, 1.0f, 1.0f));
+      view = glm::translate(view, glm::vec3(0.0f, 0.0f, -30.0f));
+      projection = glm::perspective(temp, 1.0f, 0.1f, 1000.0f);
+    }
     int modelLoc = glGetUniformLocation(shader.ID, "model");
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
     int viewLoc = glGetUniformLocation(shader.ID, "view");
