@@ -27,6 +27,12 @@
     <Text Include="lightsShaderSrc.txt">
       <Filter>资源文件</Filter>
     </Text>
+    <Text Include="GouraudV.txt">
+      <Filter>资源文件</Filter>
+    </Text>
+    <Text Include="GouraudF.txt">
+      <Filter>资源文件</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stb_truetype.h">

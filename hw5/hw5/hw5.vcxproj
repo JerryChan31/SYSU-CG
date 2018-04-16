@@ -122,6 +122,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <Text Include="fShaderSrc.txt" />
+    <Text Include="GouraudF.txt" />
+    <Text Include="GouraudV.txt" />
     <Text Include="lightfShaderSrc.txt" />
     <Text Include="lightsShaderSrc.txt" />
     <Text Include="vShaderSrc.txt" />
