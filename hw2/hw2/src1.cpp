@@ -274,29 +274,29 @@ vector<float> BresenhamCircle(int x, int y, int radius) {
     }
     xi++;
     //1
-    result.push_back((float)(xi + x) / (float)WINDOW_WIDTH);
-    result.push_back((float)(yi + y) / (float)WINDOW_HEIGHT);
+    result.push_back((float)(xi + x) / (float)WINDOW_WIDTH *2);
+    result.push_back((float)(yi + y) / (float)WINDOW_HEIGHT *2);
     //2
-    result.push_back((float)(-xi + x) / (float)WINDOW_WIDTH);
-    result.push_back((float)(yi + y) / (float)WINDOW_HEIGHT);
+    result.push_back((float)(-xi + x) / (float)WINDOW_WIDTH *2);
+    result.push_back((float)(yi + y) / (float)WINDOW_HEIGHT *2);
     //3
-    result.push_back((float)(xi + x) / (float)WINDOW_WIDTH);
-    result.push_back((float)(-yi + y) / (float)WINDOW_HEIGHT);
+    result.push_back((float)(xi + x) / (float)WINDOW_WIDTH *2);
+    result.push_back((float)(-yi + y) / (float)WINDOW_HEIGHT *2);
     //4
-    result.push_back((float)(-xi + x) / (float)WINDOW_WIDTH);
-    result.push_back((float)(-yi + y) / (float)WINDOW_HEIGHT);
+    result.push_back((float)(-xi + x) / (float)WINDOW_WIDTH *2);
+    result.push_back((float)(-yi + y) / (float)WINDOW_HEIGHT *2);
     //5
-    result.push_back((float)(yi + x) / (float)WINDOW_WIDTH);
-    result.push_back((float)(xi + y) / (float)WINDOW_HEIGHT);
+    result.push_back((float)(yi + x) / (float)WINDOW_WIDTH *2);
+    result.push_back((float)(xi + y) / (float)WINDOW_HEIGHT *2);
     //6
-    result.push_back((float)(-yi + x) / (float)WINDOW_WIDTH);
-    result.push_back((float)(xi + y) / (float)WINDOW_HEIGHT);
+    result.push_back((float)(-yi + x) / (float)WINDOW_WIDTH *2);
+    result.push_back((float)(xi + y) / (float)WINDOW_HEIGHT *2);
     //7
-    result.push_back((float)(yi + x) / (float)WINDOW_WIDTH);
-    result.push_back((float)(-xi + y) / (float)WINDOW_HEIGHT);
+    result.push_back((float)(yi + x) / (float)WINDOW_WIDTH *2);
+    result.push_back((float)(-xi + y) / (float)WINDOW_HEIGHT *2);
     //8
-    result.push_back((float)(-yi + x) / (float)WINDOW_WIDTH);
-    result.push_back((float)(-xi + y) / (float)WINDOW_HEIGHT);
+    result.push_back((float)(-yi + x) / (float)WINDOW_WIDTH *2);
+    result.push_back((float)(-xi + y) / (float)WINDOW_HEIGHT *2);
   }
   return result;
 }
