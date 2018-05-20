@@ -20,8 +20,8 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{4CDBA534-8A3E-4C0D-83C1-02636C84EE03}</ProjectGuid>
-    <RootNamespace>hw4</RootNamespace>
+    <ProjectGuid>{54265FC9-28AC-4968-A0C4-51B577A9FA18}</ProjectGuid>
+    <RootNamespace>hw6</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -122,6 +122,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <Text Include="fShaderSrc.txt" />
+    <Text Include="lightfShaderSrc.txt" />
+    <Text Include="lightsShaderSrc.txt" />
+    <Text Include="simpleDepthfShader.txt" />
+    <Text Include="simpleDepthvShader.txt" />
     <Text Include="vShaderSrc.txt" />
   </ItemGroup>
   <ItemGroup>
@@ -136,7 +140,6 @@
     <ClInclude Include="stb_truetype.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="camera.cpp" />
     <ClCompile Include="D:\OGLlib\glad.c" />
     <ClCompile Include="imgui.cpp" />
     <ClCompile Include="imgui_demo.cpp" />

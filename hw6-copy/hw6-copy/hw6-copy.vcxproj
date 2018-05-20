@@ -20,8 +20,8 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{4CDBA534-8A3E-4C0D-83C1-02636C84EE03}</ProjectGuid>
-    <RootNamespace>hw4</RootNamespace>
+    <ProjectGuid>{98FB0259-15FE-4FA8-8E3F-2AE1BB80E24D}</ProjectGuid>
+    <RootNamespace>hw6copy</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -121,8 +121,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Text Include="fShaderSrc.txt" />
-    <Text Include="vShaderSrc.txt" />
+    <ClCompile Include="D:\OGLlib\glad.c" />
+    <ClCompile Include="imgui.cpp" />
+    <ClCompile Include="imgui_demo.cpp" />
+    <ClCompile Include="imgui_draw.cpp" />
+    <ClCompile Include="imgui_impl_glfw_gl3.cpp" />
+    <ClCompile Include="shader.cpp" />
+    <ClCompile Include="src.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.h" />
@@ -136,14 +141,10 @@
     <ClInclude Include="stb_truetype.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="camera.cpp" />
-    <ClCompile Include="D:\OGLlib\glad.c" />
-    <ClCompile Include="imgui.cpp" />
-    <ClCompile Include="imgui_demo.cpp" />
-    <ClCompile Include="imgui_draw.cpp" />
-    <ClCompile Include="imgui_impl_glfw_gl3.cpp" />
-    <ClCompile Include="shader.cpp" />
-    <ClCompile Include="src1.cpp" />
+    <None Include="depthfShader.txt" />
+    <None Include="depthvShader.txt" />
+    <None Include="fshader.txt" />
+    <None Include="vshader.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
