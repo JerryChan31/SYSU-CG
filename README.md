@@ -12,3 +12,5 @@ hw4 finished.
 hw5 finished. 
 
 hw6 finished. (include bonus)
+
+hw7 finished. (1 bonus)
