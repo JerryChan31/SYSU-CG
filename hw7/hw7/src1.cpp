@@ -15,12 +15,15 @@ int cursorPosX = 0;
 int cursorPosY = 0;
 int control_points_num = 0;
 vector<glm::vec3> controlPoint;
+bool holding = false;
+int closestIndex = 0;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 void cursor_pos_callback(GLFWwindow* window, double x, double y);
 void click_callback(GLFWwindow* window, int button, int action, int mods);
 vector<glm::vec3> Bezier(glm::vec3 point0, glm::vec3 point1, glm::vec3 point2, glm::vec3 point3);
+int closest_point(vector<glm::vec3> ctrlPoints, glm::vec3 clickPos);
 glm::vec3 standardize(int x, int y);
 
 int main() {
@@ -80,7 +83,7 @@ int main() {
     glClear(GL_COLOR_BUFFER_BIT);
     // init ImGui
     {
-      if (control_points_num >= 4) {
+      if (control_points_num == 4) {
         vector<glm::vec3> curve = Bezier(controlPoint[0], controlPoint[1], controlPoint[2], controlPoint[3]);
         for (size_t i = 0; i < curve.size(); i++) {
           float point[] = { curve[i].x, curve[i].y, curve[i].z, 1.0f, 1.0f, 1.0f };
@@ -146,14 +149,26 @@ void processInput(GLFWwindow* window) {
 void cursor_pos_callback(GLFWwindow* window, double x, double y) {
   cursorPosX = x;
   cursorPosY = y;
+  if (holding && control_points_num >= 4) {
+    glm::vec3 clickPos = standardize(cursorPosX, cursorPosY);
+    controlPoint[closestIndex] = clickPos;
+  }
 }
 
 void click_callback(GLFWwindow* window, int button, int action, int mods) {
   if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-    if (control_points_num < 4) {
-      controlPoint.push_back(standardize(cursorPosX, cursorPosY));
-      control_points_num++;
-    }
+    holding = true;
+  }
+  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+    holding = false;
+  }
+  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && control_points_num < 4) {
+    controlPoint.push_back(standardize(cursorPosX, cursorPosY));
+    control_points_num++;
+  }
+  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && control_points_num >= 4) {
+    glm::vec3 clickPos = standardize(cursorPosX, cursorPosY);
+    closestIndex = closest_point(controlPoint, clickPos);
   }
 }
 
@@ -173,4 +188,17 @@ vector<glm::vec3> Bezier(glm::vec3 point0, glm::vec3 point1, glm::vec3 point2, g
 glm::vec3 standardize(int x, int y) {
   glm::vec3 result = glm::vec3((float(x) / float(WINDOW_WIDTH)*2.0)-1 , -((float(y) / float(WINDOW_HEIGHT)*2)-1), 0.0f);
   return result;
+}
+
+int closest_point(vector<glm::vec3> ctrlPoints, glm::vec3 clickPos) {
+  int flag = -1;
+  float minDistance = FLT_MAX;
+  for (int i = 0; i < ctrlPoints.size(); i++) {
+    float distance = glm::distance(ctrlPoints[i], clickPos);
+    if (distance < minDistance) {
+      flag = i;
+      minDistance = distance;
+    }
+  }
+  return flag;
 }
