@@ -17,6 +17,7 @@ int control_points_num = 0;
 vector<glm::vec3> controlPoint;
 bool holding = false;
 int closestIndex = 0;
+bool onDelete = false;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
@@ -42,8 +43,7 @@ int main() {
   }
   glfwMakeContextCurrent(window);
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-  glfwSetCursorPosCallback(window, cursor_pos_callback);
-  glfwSetMouseButtonCallback(window, click_callback);
+
   // glad init
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
     cout << "Failed to initialize GLAD" << endl;
@@ -53,12 +53,13 @@ int main() {
   Shader shader("vShaderSrc.txt", "fShaderSrc.txt");
   // ======================================
   // Setup ImGui bindings
-  //ImGui::CreateContext();
-  //ImGuiIO& io = ImGui::GetIO(); (void)io;
-  //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
-  //ImGui_ImplGlfwGL3_Init(window, true);
-  //ImGui::StyleColorsDark();
-
+  ImGui::CreateContext();
+  ImGuiIO& io = ImGui::GetIO(); (void)io;
+  io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
+  ImGui_ImplGlfwGL3_Init(window, true);
+  ImGui::StyleColorsDark();
+  glfwSetCursorPosCallback(window, cursor_pos_callback);
+  glfwSetMouseButtonCallback(window, click_callback);
   unsigned int VBO;
   // generate VBO & bind to buffer
   glGenBuffers(1, &VBO);
@@ -71,22 +72,24 @@ int main() {
   unsigned int VAO;
   glGenVertexArrays(1, &VAO);
   glBindVertexArray(VAO);
-
+  float color[3] = { 1.0f, 1.0f, 1.0f };
   // ---- render loop ----
   while (!glfwWindowShouldClose(window)) {
     vector<vector<float>> triangle;
     // process input from keyboard/mouse/other
     processInput(window);
     glfwPollEvents();
-    //ImGui_ImplGlfwGL3_NewFrame();
+    ImGui_ImplGlfwGL3_NewFrame();
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
     // init ImGui
     {
+      ImGui::ColorEdit3("curve color", color, 0);
+      ImGui::Checkbox("on delete", &onDelete);
       if (control_points_num == 4) {
         vector<glm::vec3> curve = Bezier(controlPoint[0], controlPoint[1], controlPoint[2], controlPoint[3]);
         for (size_t i = 0; i < curve.size(); i++) {
-          float point[] = { curve[i].x, curve[i].y, curve[i].z, 1.0f, 1.0f, 1.0f };
+          float point[] = { curve[i].x, curve[i].y, curve[i].z, color[0], color[1], color[2] };
           glBindVertexArray(VAO);
           glBufferData(GL_ARRAY_BUFFER, sizeof(point), point, GL_STATIC_DRAW);
           // position
@@ -101,36 +104,33 @@ int main() {
           glBufferData(GL_ARRAY_BUFFER, sizeof(point), point, GL_STATIC_DRAW);
           glDrawArrays(GL_POINTS, 0, 1);
         }
-        for (size_t i = 0; i < 4; i++) {
-          float point[] = {
-            controlPoint[0].x, controlPoint[0].y, controlPoint[0].z, 1.0f, 1.0f, 1.0f,
-            controlPoint[1].x, controlPoint[1].y, controlPoint[1].z, 1.0f, 1.0f, 1.0f,
-            controlPoint[2].x, controlPoint[2].y, controlPoint[2].z, 1.0f, 1.0f, 1.0f,
-            controlPoint[3].x, controlPoint[3].y, controlPoint[3].z, 1.0f, 1.0f, 1.0f,
-          };
-          glBindVertexArray(VAO);
-          glBufferData(GL_ARRAY_BUFFER, sizeof(point), point, GL_STATIC_DRAW);
-          // position
-          glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-          glEnableVertexAttribArray(0);
-          //color
-          glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-          glEnableVertexAttribArray(1);
-          glBindBuffer(GL_ARRAY_BUFFER, VBO);
-          glBufferData(GL_ARRAY_BUFFER, sizeof(point), point, GL_STATIC_DRAW);
-          glBindBuffer(GL_ARRAY_BUFFER, VBO);
-          glBufferData(GL_ARRAY_BUFFER, sizeof(point), point, GL_STATIC_DRAW);
-          glDrawArrays(GL_POINTS, 0, 4);
-        }
+      }
+      for (size_t i = 0; i < controlPoint.size(); i++) {
+        float point[] = {
+          controlPoint[i].x, controlPoint[i].y, controlPoint[i].z, color[0], color[1], color[2],
+        };
+        glBindVertexArray(VAO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(point), point, GL_STATIC_DRAW);
+        // position
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(0);
+        //color
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+        glEnableVertexAttribArray(1);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(point), point, GL_STATIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(point), point, GL_STATIC_DRAW);
+        glDrawArrays(GL_POINTS, 0, 4);
       }
     }    
-    //ImGui::Render();
-    //ImGui_ImplGlfwGL3_RenderDrawData(ImGui::GetDrawData());
+    ImGui::Render();
+    ImGui_ImplGlfwGL3_RenderDrawData(ImGui::GetDrawData());
     glfwSwapBuffers(window);
   }
   // release sources
-  //ImGui_ImplGlfwGL3_Shutdown();
-  //ImGui::DestroyContext();
+  ImGui_ImplGlfwGL3_Shutdown();
+  ImGui::DestroyContext();
   glfwTerminate();
   return 0;
 }
@@ -147,28 +147,35 @@ void processInput(GLFWwindow* window) {
 }
 
 void cursor_pos_callback(GLFWwindow* window, double x, double y) {
+  bool hovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow);
   cursorPosX = x;
   cursorPosY = y;
-  if (holding && control_points_num >= 4) {
+  if (holding && control_points_num >= 4 && !hovered) {
     glm::vec3 clickPos = standardize(cursorPosX, cursorPosY);
     controlPoint[closestIndex] = clickPos;
   }
 }
 
 void click_callback(GLFWwindow* window, int button, int action, int mods) {
+  bool hovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow);
+  glm::vec3 clickPos = standardize(cursorPosX, cursorPosY);
   if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
     holding = true;
   }
   if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
     holding = false;
   }
-  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && control_points_num < 4) {
+  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && control_points_num < 4 && !hovered && !onDelete) {
     controlPoint.push_back(standardize(cursorPosX, cursorPosY));
     control_points_num++;
   }
-  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && control_points_num >= 4) {
-    glm::vec3 clickPos = standardize(cursorPosX, cursorPosY);
+  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && control_points_num >= 4 && !hovered && !onDelete) {
     closestIndex = closest_point(controlPoint, clickPos);
+  }
+  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && control_points_num < 4 && !hovered && onDelete) {
+    closestIndex = closest_point(controlPoint, clickPos);
+    controlPoint.erase(controlPoint.begin()+closestIndex);
+    control_points_num--;
   }
 }
 
