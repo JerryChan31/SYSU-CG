@@ -18,6 +18,7 @@ vector<glm::vec3> controlPoint;
 bool holding = false;
 int closestIndex = 0;
 bool onDelete = false;
+bool onClear = false;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
@@ -86,6 +87,13 @@ int main() {
     {
       ImGui::ColorEdit3("curve color", color, 0);
       ImGui::Checkbox("on delete", &onDelete);
+      ImGui::Checkbox("clear", &onClear);
+      ImGui::SetWindowSize(ImVec2(300,100));
+      if (onClear) {
+        control_points_num = 0;
+        controlPoint.clear();
+        onClear = false;
+      }
       if (control_points_num == 4) {
         vector<glm::vec3> curve = Bezier(controlPoint[0], controlPoint[1], controlPoint[2], controlPoint[3]);
         for (size_t i = 0; i < curve.size(); i++) {
@@ -102,6 +110,7 @@ int main() {
           glBufferData(GL_ARRAY_BUFFER, sizeof(point), point, GL_STATIC_DRAW);
           glBindBuffer(GL_ARRAY_BUFFER, VBO);
           glBufferData(GL_ARRAY_BUFFER, sizeof(point), point, GL_STATIC_DRAW);
+          glPointSize(2.0f);
           glDrawArrays(GL_POINTS, 0, 1);
         }
       }
@@ -121,6 +130,7 @@ int main() {
         glBufferData(GL_ARRAY_BUFFER, sizeof(point), point, GL_STATIC_DRAW);
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
         glBufferData(GL_ARRAY_BUFFER, sizeof(point), point, GL_STATIC_DRAW);
+        glPointSize(2.0f);
         glDrawArrays(GL_POINTS, 0, 4);
       }
     }    
@@ -172,7 +182,8 @@ void click_callback(GLFWwindow* window, int button, int action, int mods) {
   if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && control_points_num >= 4 && !hovered && !onDelete) {
     closestIndex = closest_point(controlPoint, clickPos);
   }
-  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && control_points_num < 4 && !hovered && onDelete) {
+  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && control_points_num < 4 
+      && control_points_num > 0 && !hovered && onDelete) {
     closestIndex = closest_point(controlPoint, clickPos);
     controlPoint.erase(controlPoint.begin()+closestIndex);
     control_points_num--;
