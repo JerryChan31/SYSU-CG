@@ -137,13 +137,13 @@
     <ClInclude Include="stb_truetype.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="D:\OGLlib\glad.c" />
+    <ClCompile Include="glad.c" />
     <ClCompile Include="imgui.cpp" />
     <ClCompile Include="imgui_demo.cpp" />
     <ClCompile Include="imgui_draw.cpp" />
     <ClCompile Include="imgui_impl_glfw_gl3.cpp" />
     <ClCompile Include="shader.cpp" />
-    <ClCompile Include="src1.cpp" />
+    <ClCompile Include="src.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
