@@ -1,7 +1,7 @@
 # SYSU-CG
 中山大学2018年计算机图形学课程作业 by JerryChan
 
-Progress: 
+## Progress:
 
 hw1 finished. 
 
@@ -38,7 +38,7 @@ hw7 finished.
 
 ![]()
 
-## HW3 
+## HW3 Transformations
 
 1. 画一个立方体(cube)：边长为0.4， 中心位置为(0, 0, 0)。分别启动和关闭深度测试 `glEnable(GL_DEPTH_TEST)` 、 `glDisable(GL_DEPTH_TEST)`。
 2. 平移(Translation)：使画好的cube沿着水平或垂直方向来回移动。
@@ -48,7 +48,7 @@ hw7 finished.
 
 ![]()
 
-## HW4 
+## HW4 Camera
 
 1. 投影(Projection):
 把上次作业绘制的cube放置在(-1.5, 0.5, -1.5)位置，要求6个面颜色不一致
@@ -66,7 +66,7 @@ hw7 finished.
 
 ![]()
 
-## HW5
+## HW5 Lights and shading
 
 1. 实现Phong光照模型：
 场景中绘制一个cube，自己写shader实现两种shading: Phong Shading 和 Gouraud Shading，并解释两种shading的
@@ -75,7 +75,7 @@ hw7 finished.
 
 ![]()
 
-## HW6
+## HW6 Shadow Mapping
 
 1. 实现Shadowing Mapping:
 要求场景中至少有一个object和一块平面(用于显示shadow)，光源的投影方式任选其一即可。
@@ -85,7 +85,7 @@ hw7 finished.
 
 ![]()
 
-## HW7
+## HW7 Bezier Curve
 
 1. 用户能在工具屏幕上画4个点（使用鼠标点击），然后工具会根据这4个点拟合出一条Bezier
 Curve（按照画点的顺序）
