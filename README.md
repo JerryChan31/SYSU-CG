@@ -25,7 +25,7 @@ hw7 finished.
 4. 绘制其他的图元，除了三角形，还有点、线等。
 5. 使用EBO(Element Buffer Object)绘制多个三角形。
 
-![]()
+![hw1](https://github.com/JerryChan31/SYSU-CG/blob/develop/asset/hw1.png)
 
 ## HW2 Bresenham算法
 
@@ -36,7 +36,7 @@ hw7 finished.
 3. 在GUI在添加菜单栏，可以选择是线还是圆，以及能调整圆的大小(圆心固定即可)。
 4. 使用三角形光栅转换算法，用和背景不同的颜色，填充你的三角形。
 
-![]()
+![hw2](https://github.com/JerryChan31/SYSU-CG/blob/develop/asset/hw2.png)
 
 ## HW3 Transformations
 
@@ -46,7 +46,7 @@ hw7 finished.
 4. 放缩(Scaling)：使画好的cube持续放大缩小。
 5. 在GUI里添加菜单栏，可以选择各种变换。
 
-![]()
+![hw3](https://github.com/JerryChan31/SYSU-CG/blob/develop/asset/hw3.png)
 
 ## HW4 Camera
 
@@ -64,7 +64,7 @@ hw7 finished.
 
 原理很容易理解，由于圆的公式 a^2+b^2=1 ，以及有 sin(x)^2+cos(x)^2=1 ，所以能保证摄像机在XoZ平面的一个圆上。
 
-![]()
+![hw4](https://github.com/JerryChan31/SYSU-CG/blob/develop/asset/hw4.png)
 
 ## HW5 Lights and shading
 
@@ -73,7 +73,7 @@ hw7 finished.
 实现原理，合理设置视点、光照位置、光照颜色等参数，使光照效果明显显示。
 2. 使用GUI，使参数可调节，效果实时更改：GUI里可以切换两种shading，使用如进度条这样的控件，使ambient因子、diffuse因子、specular因子、反光度等参数可调节，光照效果实时更改。
 
-![]()
+![hw5](https://github.com/JerryChan31/SYSU-CG/blob/develop/asset/hw5.png)
 
 ## HW6 Shadow Mapping
 
@@ -83,7 +83,7 @@ hw7 finished.
 1. 实现光源在正交/透视两种投影下的Shadowing Mapping。
 2. 优化Shadowing Mapping。
 
-![]()
+![hw6](https://github.com/JerryChan31/SYSU-CG/blob/develop/asset/hw6.png)
 
 ## HW7 Bezier Curve
 
@@ -94,4 +94,4 @@ Curve（按照画点的顺序）
 3. 在GUI里添加菜单栏，用户可以选择Bezier Curve的颜色。
 4. 用户画点时，可以把画出的某个点消除。
 
-![]()
+![hw7](https://github.com/JerryChan31/SYSU-CG/blob/develop/asset/hw7.png)
